@@ -1,12 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import useWebSocket, { ReadyState } from "react-use-websocket";
-
+import { AuthContext } from "../contexts/AuthContext";
 export function Chat() {
     const [welcomeMessage, setWelcomeMessage] = useState("");
     const [message, setMessage] = useState("");
     const [name, setName] = useState("");
     const [messageHistory, setMessageHistory] = useState<any>([]);
-    const { readyState } = useWebSocket("ws://127.0.0.1:8000/", {
+    const { user } = useContext(AuthContext);
+    const { readyState } = useWebSocket(user ? "ws://127.0.0.1:8000/" : null, {
+        queryParams: {
+            token: user ? user.token : "",
+        },
         onOpen: () => {
             console.log("Connected!");
         },
@@ -56,7 +60,11 @@ export function Chat() {
         [ReadyState.CLOSED]: "Closed",
         [ReadyState.UNINSTANTIATED]: "Uninstantiated"
     }[readyState];
-    const { sendJsonMessage } = useWebSocket("ws://127.0.0.1:8000/");
+    const { sendJsonMessage } = useWebSocket(user ? "ws://127.0.0.1:8000/" : null, {
+        queryParams: {
+            token: user ? user.token : "",
+        }
+    })
 
     return (
         <div>
