@@ -72,6 +72,9 @@ export function Navbar() {
                                         <Link to="/login" className="block py-2 pr-4 pl-3 text-white md:p-0 dark:text-white">
                                             Login
                                         </Link>
+                                        <Link to="/register" className="block py-2 pr-4 pl-3 text-white md:p-0 dark:text-white">
+                                            Register
+                                        </Link>
                                     </li>
                                 ) : (
                                     <>

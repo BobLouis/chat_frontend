@@ -1,12 +1,12 @@
 import { useFormik } from "formik";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
 
-export function Login() {
+export function Register() {
     const navigate = useNavigate();
     const [error, setError] = useState(null);
-    const { user, login } = useContext(AuthContext);
+    const { user, register } = useContext(AuthContext);
 
     const formik = useFormik({
         initialValues: {
@@ -16,7 +16,7 @@ export function Login() {
         onSubmit: async (values, { setSubmitting }) => {
             setSubmitting(true);
             const { username, password } = values;
-            const res = await login(username, password);
+            const res = await register(username, password);
             if (res.error || res.data) {
                 if (res.data && res.data.detail) {
                     setError(res.data.detail);
@@ -33,9 +33,6 @@ export function Login() {
             navigate("/");
         }
     }, [user]);
-    const navigateToRegister = () => {
-        navigate("/register");
-    };
 
     return (
         <div>
@@ -73,14 +70,6 @@ export function Login() {
                         {formik.isSubmitting ? "Signing in..." : "Sign in"}
                     </button>
                 </form>
-                <div className="mt-6">
-                    <button
-                        onClick={navigateToRegister}
-                        className="text-sm text-sky-600 hover:text-sky-700"
-                    >
-                        Don't have an account? Register
-                    </button>
-                </div>
             </div>
         </div>
     );

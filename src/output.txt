@@ -1,0 +1,595 @@
+Directory: components
+File: components/ProtectedRoute.tsx
+Contents:
+import { useContext } from "react";
+import { Navigate } from "react-router-dom";
+
+import { AuthContext } from "../contexts/AuthContext";
+
+export function ProtectedRoute({ children }: { children: any }) {
+    const { user } = useContext(AuthContext);
+    if (!user) {
+        return <Navigate to="/login" replace />;
+    }
+    return children;
+}
+File: components/Chat.tsx
+Contents:
+import React, { useState, useContext } from "react";
+import useWebSocket, { ReadyState } from "react-use-websocket";
+import { AuthContext } from "../contexts/AuthContext";
+export function Chat() {
+    const [welcomeMessage, setWelcomeMessage] = useState("");
+    const [message, setMessage] = useState("");
+    const [name, setName] = useState("");
+    const [messageHistory, setMessageHistory] = useState<any>([]);
+    const { user } = useContext(AuthContext);
+    const { readyState } = useWebSocket(user ? "ws://127.0.0.1:8000/" : null, {
+        queryParams: {
+            token: user ? user.token : "",
+        },
+        onOpen: () => {
+            console.log("Connected!");
+        },
+        onClose: () => {
+            console.log("Disconnected!");
+        },
+        onMessage: (e) => {
+            const data = JSON.parse(e.data);
+            switch (data.type) {
+                case "welcome_message":
+                    setWelcomeMessage(data.message);
+                    break;
+                case 'chat_message_echo':
+                    setMessageHistory((prev: any) => prev.concat(data));
+                    break;
+                default:
+                    console.error("Unknown message type!");
+                    break;
+            }
+        }
+    });
+    function handleChangeMessage(e: any) {
+        setMessage(e.target.value);
+    }
+
+    function handleChangeName(e: any) {
+        setName(e.target.value);
+
+    }
+
+    function handleSubmit() {
+        sendJsonMessage({
+            type: "chat_message",
+            message,
+            name
+        });
+        setName("");
+        setMessage("");
+    }
+
+
+
+    const connectionStatus = {
+        [ReadyState.CONNECTING]: "Connecting",
+        [ReadyState.OPEN]: "Open",
+        [ReadyState.CLOSING]: "Closing",
+        [ReadyState.CLOSED]: "Closed",
+        [ReadyState.UNINSTANTIATED]: "Uninstantiated"
+    }[readyState];
+    const { sendJsonMessage } = useWebSocket(user ? "ws://127.0.0.1:8000/" : null, {
+        queryParams: {
+            token: user ? user.token : "",
+        }
+    })
+
+    return (
+        <div>
+            <span>The WebSocket is currently {connectionStatus}</span>
+            {/* Display the welcome message */}
+            {welcomeMessage && <p>{welcomeMessage}</p>}
+            <button
+                className="bg-gray-300 px-3 py-1"
+                onClick={() => {
+                    sendJsonMessage({
+                        type: "greeting",
+                        message: "Hi!"
+                    });
+                }}
+            >
+                Say Hi
+            </button>
+            <input
+                name="name"
+                placeholder='Name'
+                onChange={handleChangeName}
+                value={name}
+                className="shadow-sm sm:text-sm border-gray-300 bg-gray-100 rounded-md" />
+            <input
+                name="message"
+                placeholder='Message'
+                onChange={handleChangeMessage}
+                value={message}
+                className="ml-2 shadow-sm sm:text-sm border-gray-300 bg-gray-100 rounded-md" />
+            <button className='ml-3 bg-gray-300 px-3 py-1' onClick={handleSubmit}>
+                Submit
+            </button>
+            <hr />
+            <ul>
+                {messageHistory.map((message: any, idx: number) => (
+                    <div className='border border-gray-200 py-3 px-3' key={idx}>
+                        {message.name}: {message.message}
+                    </div>
+                ))}
+            </ul>
+        </div>
+    );
+}
+
+File: components/Navbar.tsx
+Contents:
+import React, { useContext } from "react";
+import { Link, Outlet } from "react-router-dom";
+import { AuthContext } from "../contexts/AuthContext";
+
+export function Navbar() {
+    const { user, logout } = useContext(AuthContext);
+    return (
+        <>
+            <nav className="bg-white border-gray-200 px-4 sm:px-6 py-2.5 rounded dark:bg-gray-800">
+                <div className="max-w-5xl mx-auto flex flex-wrap justify-between items-center">
+                    <Link to="/" className="flex items-center">
+                        <span className="self-center text-xl font-semibold whitespace-nowrap dark:text-white">
+                            Conversa DJ
+                        </span>
+                    </Link>
+                    <button
+                        data-collapse-toggle="mobile-menu"
+                        type="button"
+                        className="inline-flex items-center p-2 ml-3 text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+                        aria-controls="mobile-menu"
+                        aria-expanded="false"
+                    >
+                        <span className="sr-only">Open main menu</span>
+                        <svg
+                            className="w-6 h-6"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path
+                                fillRule="evenodd"
+                                d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+                                clipRule="evenodd"
+                            ></path>
+                        </svg>
+                        <svg
+                            className="hidden w-6 h-6"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path
+                                fillRule="evenodd"
+                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                clipRule="evenodd"
+                            ></path>
+                        </svg>
+                    </button>
+                    <div className="hidden w-full md:block md:w-auto" id="mobile-menu">
+                        <ul className="flex flex-col mt-4 md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium">
+                            <li>
+                                <Link
+                                    to="/"
+                                    className="block py-2 pr-4 pl-3 text-white md:p-0 dark:text-white"
+                                    aria-current="page"
+                                >
+                                    Chats
+                                </Link>
+                            </li>
+                            {/* <li>
+                                <Link
+                                    to="/login"
+                                    className="block py-2 pr-4 pl-3 text-white md:p-0 dark:text-white"
+                                >
+                                    Login
+                                </Link>
+                            </li> */}
+
+                            {
+                                !user ? (
+                                    <li>
+                                        <Link to="/login" className="block py-2 pr-4 pl-3 text-white md:p-0 dark:text-white">
+                                            Login
+                                        </Link>
+                                        <Link to="/register" className="block py-2 pr-4 pl-3 text-white md:p-0 dark:text-white">
+                                            Register
+                                        </Link>
+                                    </li>
+                                ) : (
+                                    <>
+                                        <span className="text-white">Logged in: {user.username}</span>
+                                        <button className="block py-2 pr-4 pl-3 text-white md:p-0 dark:text-white" onClick={logout}>
+                                            Logout
+                                        </button>
+                                    </>
+                                )
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+            <div className="max-w-5xl mx-auto py-6">
+                <Outlet />
+            </div>
+        </>
+    );
+}
+File: components/Register.tsx
+Contents:
+import { useFormik } from "formik";
+import { useContext, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../contexts/AuthContext";
+
+export function Register() {
+    const navigate = useNavigate();
+    const [error, setError] = useState(null);
+    const { user, register } = useContext(AuthContext);
+
+    const formik = useFormik({
+        initialValues: {
+            username: "",
+            password: ""
+        },
+        onSubmit: async (values, { setSubmitting }) => {
+            setSubmitting(true);
+            const { username, password } = values;
+            const res = await register(username, password);
+            if (res.error || res.data) {
+                if (res.data && res.data.detail) {
+                    setError(res.data.detail);
+                }
+            } else {
+                navigate("/");
+            }
+            setSubmitting(false);
+        }
+    });
+
+    useEffect(() => {
+        if (user) {
+            navigate("/");
+        }
+    }, [user]);
+
+    return (
+        <div>
+            <div className="w-full max-w-md space-y-8">
+                <div>
+                    <h1 className="mt-6 text-3xl font-extrabold text-gray-900">Sign in to your account</h1>
+                </div>
+
+                <form className="mt-8 space-y-6" onSubmit={formik.handleSubmit}>
+                    {error && <div>{JSON.stringify(error)}</div>}
+
+                    <div className="-space-y-px rounded-md">
+                        <input
+                            value={formik.values.username}
+                            onChange={formik.handleChange}
+                            type="text"
+                            name="username"
+                            placeholder="Username"
+                            className="border-gray-300 text-gray-900 placeholder-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full pr-10 focus:outline-none sm:text-sm rounded-md"
+                        />
+                        <input
+                            value={formik.values.password}
+                            onChange={formik.handleChange}
+                            type="password"
+                            name="password"
+                            className="border-gray-300 text-gray-900 placeholder-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full pr-10 focus:outline-none sm:text-sm rounded-md"
+                            placeholder="Password"
+                        />
+                    </div>
+
+                    <button
+                        type="submit"
+                        className="group relative flex w-full justify-center rounded-md border border-transparent bg-sky-600 py-2 px-4 text-sm font-medium text-white hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
+                    >
+                        {formik.isSubmitting ? "Signing in..." : "Sign in"}
+                    </button>
+                </form>
+            </div>
+        </div>
+    );
+}
+
+File: components/Login.tsx
+Contents:
+import { useFormik } from "formik";
+import { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../contexts/AuthContext";
+
+export function Login() {
+    const navigate = useNavigate();
+    const [error, setError] = useState(null);
+    const { user, login } = useContext(AuthContext);
+
+    const formik = useFormik({
+        initialValues: {
+            username: "",
+            password: ""
+        },
+        onSubmit: async (values, { setSubmitting }) => {
+            setSubmitting(true);
+            const { username, password } = values;
+            const res = await login(username, password);
+            if (res.error || res.data) {
+                if (res.data && res.data.detail) {
+                    setError(res.data.detail);
+                }
+            } else {
+                navigate("/");
+            }
+            setSubmitting(false);
+        }
+    });
+
+    useEffect(() => {
+        if (user) {
+            navigate("/");
+        }
+    }, [user]);
+    const navigateToRegister = () => {
+        navigate("/register");
+    };
+
+    return (
+        <div>
+            <div className="w-full max-w-md space-y-8">
+                <div>
+                    <h1 className="mt-6 text-3xl font-extrabold text-gray-900">Sign in to your account</h1>
+                </div>
+
+                <form className="mt-8 space-y-6" onSubmit={formik.handleSubmit}>
+                    {error && <div>{JSON.stringify(error)}</div>}
+
+                    <div className="-space-y-px rounded-md">
+                        <input
+                            value={formik.values.username}
+                            onChange={formik.handleChange}
+                            type="text"
+                            name="username"
+                            placeholder="Username"
+                            className="border-gray-300 text-gray-900 placeholder-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full pr-10 focus:outline-none sm:text-sm rounded-md"
+                        />
+                        <input
+                            value={formik.values.password}
+                            onChange={formik.handleChange}
+                            type="password"
+                            name="password"
+                            className="border-gray-300 text-gray-900 placeholder-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full pr-10 focus:outline-none sm:text-sm rounded-md"
+                            placeholder="Password"
+                        />
+                    </div>
+
+                    <button
+                        type="submit"
+                        className="group relative flex w-full justify-center rounded-md border border-transparent bg-sky-600 py-2 px-4 text-sm font-medium text-white hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
+                    >
+                        {formik.isSubmitting ? "Signing in..." : "Sign in"}
+                    </button>
+                </form>
+                <div className="mt-6">
+                    <button
+                        onClick={navigateToRegister}
+                        className="text-sm text-sky-600 hover:text-sky-700"
+                    >
+                        Don't have an account? Register
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+Directory: contexts
+File: contexts/AuthContext.tsx
+Contents:
+import axios, { AxiosInstance } from "axios";
+import React, { createContext, ReactNode, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import { UserModel } from "../models/User";
+import authHeader from "../services/AuthHeader";
+import AuthService from "../services/AuthService";
+
+const DefaultProps = {
+    register: () => null,
+    login: () => null,
+    logout: () => null,
+    authAxios: axios,
+    user: null
+};
+
+export interface AuthProps {
+    register: (username: string, password: string) => any;
+    login: (username: string, password: string) => any;
+    logout: () => void;
+    authAxios: AxiosInstance;
+    user: UserModel | null;
+}
+
+export const AuthContext = createContext<AuthProps>(DefaultProps);
+
+export const AuthContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+    const navigate = useNavigate();
+    const [user, setUser] = useState(() => AuthService.getCurrentUser());
+
+
+    async function register(username: string, password: string) {
+        const data = await AuthService.register(username, password);
+        setUser(data);
+        return data;
+    }
+    async function login(username: string, password: string) {
+        const data = await AuthService.login(username, password);
+        setUser(data);
+        return data;
+    }
+
+    function logout() {
+        AuthService.logout();
+        setUser(null);
+        navigate("/login");
+    }
+
+    // axios instance for making requests
+    const authAxios = axios.create();
+
+    // request interceptor for adding token
+    authAxios.interceptors.request.use((config) => {
+        // add token to request headers
+        config.headers = authHeader();
+        return config;
+    });
+
+    authAxios.interceptors.response.use(
+        (response) => {
+            return response;
+        },
+        (error) => {
+            if (error.response.status === 401) {
+                logout();
+            }
+            return Promise.reject(error);
+        }
+    );
+
+    return (
+        <AuthContext.Provider value={{ user, login, logout, register, authAxios }}>
+            {children}
+        </AuthContext.Provider>
+    );
+};
+
+Directory: models
+File: models/User.ts
+Contents:
+export interface UserModel {
+    username: string;
+    token: string;
+}
+
+Directory: services
+File: services/AuthHeader.ts
+Contents:
+import { AxiosRequestHeaders } from "axios";
+
+export default function authHeader(): AxiosRequestHeaders {
+    const localStorageUser = localStorage.getItem("user");
+    let headers = {
+        'Content-Type': 'application/json',
+    } as AxiosRequestHeaders;
+    if (localStorageUser) {
+
+        const user = JSON.parse(localStorageUser);
+        headers = {
+            'Authorization': `Token ${user.token}`,
+            'Content-Type': 'application/json',
+        } as AxiosRequestHeaders;
+    }
+
+
+
+    return headers;
+}
+
+File: services/AuthService.ts
+Contents:
+import axios from "axios";
+
+import { UserModel } from "../models/User";
+
+class AuthService {
+    setUserInLocalStorage(data: UserModel) {
+        localStorage.setItem("user", JSON.stringify(data));
+    }
+
+    async register(username: string, password: string): Promise<UserModel> {
+        const response = await axios.post("http://127.0.0.1:8000/register/", { username, password });
+        if (!response.data.token) {
+            return response.data;
+        }
+        this.setUserInLocalStorage(response.data);
+        return response.data;
+    }
+
+    async login(username: string, password: string): Promise<UserModel> {
+        const response = await axios.post("http://127.0.0.1:8000/login/", { username, password });
+        if (!response.data.token) {
+            return response.data;
+        }
+        this.setUserInLocalStorage(response.data);
+        return response.data;
+    }
+
+    logout() {
+        localStorage.removeItem("user");
+    }
+
+    getCurrentUser() {
+        const user = localStorage.getItem("user")!;
+        return JSON.parse(user);
+    }
+}
+
+export default new AuthService();
+
+App.tsx Contents:
+import React from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+
+import { Chat } from "./components/Chat";
+import { Register } from "./components/Register";
+import { Login } from "./components/Login";
+import { Navbar } from "./components/Navbar";
+
+import { AuthContextProvider } from "./contexts/AuthContext";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <AuthContextProvider>
+              <Navbar />
+            </AuthContextProvider>
+          }
+        >
+          {/* <Route
+            path=""
+            element={
+              <ProtectedRoute>
+                <Conversations />
+              </ProtectedRoute>
+            }
+          /> */}
+          <Route
+            path="chats/:conversationName"
+            element={
+              <ProtectedRoute>
+                <Chat />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="register" element={<Register />} />
+          <Route path="login" element={<Login />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
+}

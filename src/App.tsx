@@ -2,8 +2,10 @@ import React from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import { Chat } from "./components/Chat";
+import { Register } from "./components/Register";
 import { Login } from "./components/Login";
 import { Navbar } from "./components/Navbar";
+
 import { AuthContextProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 export default function App() {
@@ -34,6 +36,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="register" element={<Register />} />
           <Route path="login" element={<Login />} />
         </Route>
       </Routes>
