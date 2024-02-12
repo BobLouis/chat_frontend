@@ -28,8 +28,16 @@ export default function App() {
               </ProtectedRoute>
             }
           /> */}
-          <Route
+          {/* <Route
             path="chats/:conversationName"
+            element={
+              <ProtectedRoute>
+                <Chat />
+              </ProtectedRoute>
+            }
+          /> */}
+          <Route
+            path="chats/"
             element={
               <ProtectedRoute>
                 <Chat />

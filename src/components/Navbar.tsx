@@ -50,7 +50,7 @@ export function Navbar() {
                         <ul className="flex flex-col mt-4 md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium">
                             <li>
                                 <Link
-                                    to="/"
+                                    to="/chats/"
                                     className="block py-2 pr-4 pl-3 text-white md:p-0 dark:text-white"
                                     aria-current="page"
                                 >
@@ -68,14 +68,19 @@ export function Navbar() {
 
                             {
                                 !user ? (
-                                    <li>
-                                        <Link to="/login" className="block py-2 pr-4 pl-3 text-white md:p-0 dark:text-white">
-                                            Login
-                                        </Link>
-                                        <Link to="/register" className="block py-2 pr-4 pl-3 text-white md:p-0 dark:text-white">
-                                            Register
-                                        </Link>
-                                    </li>
+                                    <>
+                                        <li>
+                                            <Link to="/login" className="block py-2 pr-4 pl-3 text-white md:p-0 dark:text-white">
+                                                Login
+                                            </Link>
+
+                                        </li>
+                                        <li>
+                                            <Link to="/register" className="block py-2 pr-4 pl-3 text-white md:p-0 dark:text-white">
+                                                Register
+                                            </Link>
+                                        </li>
+                                    </>
                                 ) : (
                                     <>
                                         <span className="text-white">Logged in: {user.username}</span>

@@ -20,6 +20,7 @@ export function Login() {
             if (res.error || res.data) {
                 if (res.data && res.data.detail) {
                     setError(res.data.detail);
+                    console.log(res.data.detail);
                 }
             } else {
                 navigate("/");

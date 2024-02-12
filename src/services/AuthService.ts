@@ -8,21 +8,27 @@ class AuthService {
     }
 
     async register(username: string, password: string): Promise<UserModel> {
-        const response = await axios.post("http://127.0.0.1:8000/register/", { username, password });
-        if (!response.data.token) {
-            return response.data;
+        try {
+            const response = await axios.post("http://127.0.0.1:8000/auth/register/", { username, password });
+            const data: UserModel = response.data;
+            this.setUserInLocalStorage(data);
+            return data;
+        } catch (error) {
+            // Handle error (e.g., username already exists)
+            return Promise.reject(error);
         }
-        this.setUserInLocalStorage(response.data);
-        return response.data;
     }
 
     async login(username: string, password: string): Promise<UserModel> {
-        const response = await axios.post("http://127.0.0.1:8000/login/", { username, password });
-        if (!response.data.token) {
-            return response.data;
+        try {
+            const response = await axios.post("http://127.0.0.1:8000/auth/login/", { username, password });
+            const data: UserModel = response.data;
+            this.setUserInLocalStorage(data);
+            return data;
+        } catch (error) {
+            // Handle invalid credentials error
+            return Promise.reject(error);
         }
-        this.setUserInLocalStorage(response.data);
-        return response.data;
     }
 
     logout() {

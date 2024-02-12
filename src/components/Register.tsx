@@ -38,7 +38,7 @@ export function Register() {
         <div>
             <div className="w-full max-w-md space-y-8">
                 <div>
-                    <h1 className="mt-6 text-3xl font-extrabold text-gray-900">Sign in to your account</h1>
+                    <h1 className="mt-6 text-3xl font-extrabold text-gray-900">Register your account</h1>
                 </div>
 
                 <form className="mt-8 space-y-6" onSubmit={formik.handleSubmit}>
@@ -67,7 +67,7 @@ export function Register() {
                         type="submit"
                         className="group relative flex w-full justify-center rounded-md border border-transparent bg-sky-600 py-2 px-4 text-sm font-medium text-white hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
                     >
-                        {formik.isSubmitting ? "Signing in..." : "Sign in"}
+                        {formik.isSubmitting ? "Register in..." : "Register"}
                     </button>
                 </form>
             </div>

@@ -30,14 +30,22 @@ export const AuthContextProvider: React.FC<{ children: ReactNode }> = ({ childre
 
 
     async function register(username: string, password: string) {
-        const data = await AuthService.register(username, password);
-        setUser(data);
-        return data;
+        try {
+            const data = await AuthService.register(username, password);
+            setUser(data);
+            navigate("/"); // Navigate to home or dashboard after successful registration
+        } catch (error) {
+            // Handle error (e.g., show error message)
+        }
     }
     async function login(username: string, password: string) {
-        const data = await AuthService.login(username, password);
-        setUser(data);
-        return data;
+        try {
+            const data = await AuthService.login(username, password);
+            setUser(data);
+            navigate("/"); // Navigate to home or dashboard after successful login
+        } catch (error) {
+            // Handle error (e.g., show error message)
+        }
     }
 
     function logout() {
