@@ -9,7 +9,7 @@ class AuthService {
 
     async register(username: string, password: string): Promise<UserModel> {
         try {
-            const response = await axios.post("http://127.0.0.1:8000/auth/register/", { username, password });
+            const response = await axios.post("http://127.0.0.1:8000/user/register/", { username, password });
             const data: UserModel = response.data;
             this.setUserInLocalStorage(data);
             return data;
@@ -21,7 +21,7 @@ class AuthService {
 
     async login(username: string, password: string): Promise<UserModel> {
         try {
-            const response = await axios.post("http://127.0.0.1:8000/auth/login/", { username, password });
+            const response = await axios.post("http://127.0.0.1:8000/user/login/", { username, password });
             const data: UserModel = response.data;
             this.setUserInLocalStorage(data);
             return data;

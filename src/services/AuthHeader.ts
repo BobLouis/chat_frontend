@@ -9,7 +9,7 @@ export default function authHeader(): AxiosRequestHeaders {
 
         const user = JSON.parse(localStorageUser);
         headers = {
-            'Authorization': `Token ${user.token}`,
+            'Authorization': `token ${user.token}`,
             'Content-Type': 'application/json',
         } as AxiosRequestHeaders;
     }

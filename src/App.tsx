@@ -5,7 +5,7 @@ import { Chat } from "./components/Chat";
 import { Register } from "./components/Register";
 import { Login } from "./components/Login";
 import { Navbar } from "./components/Navbar";
-
+import { Conversations } from "./components/Conversations";
 import { AuthContextProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 export default function App() {
@@ -20,30 +20,30 @@ export default function App() {
             </AuthContextProvider>
           }
         >
-          {/* <Route
+          <Route
             path=""
             element={
               <ProtectedRoute>
                 <Conversations />
               </ProtectedRoute>
             }
-          /> */}
-          {/* <Route
+          />
+          <Route
             path="chats/:conversationName"
             element={
               <ProtectedRoute>
                 <Chat />
               </ProtectedRoute>
             }
-          /> */}
-          <Route
+          />
+          {/* <Route
             path="chats/"
             element={
               <ProtectedRoute>
                 <Chat />
               </ProtectedRoute>
             }
-          />
+          /> */}
           <Route path="register" element={<Register />} />
           <Route path="login" element={<Login />} />
         </Route>
