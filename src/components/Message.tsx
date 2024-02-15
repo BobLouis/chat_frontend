@@ -1,5 +1,4 @@
-import { useContext } from "react";
-
+import { useContext, useEffect } from "react";
 import { AuthContext } from "../contexts/AuthContext";
 import { MessageModel } from "../models/Message";
 
@@ -15,17 +14,23 @@ export function Message({ message }: { message: MessageModel }) {
         return date.toLocaleTimeString().slice(0, 5);
     }
 
+    useEffect(() => {
+        console.log(message);
+        // Debugging: Check if the current user is the sender of the message
+        console.log(user!.username === message.from_user.username);
+    }, [message, user]);
+
     return (
         <li
             className={classNames(
                 "mt-1 mb-1 flex",
-                user!.username === message.to_user.username ? "justify-start" : "justify-end"
+                user!.username === message.from_user.username ? "justify-end" : "justify-start"
             )}
         >
             <div
                 className={classNames(
                     "relative max-w-xl rounded-lg px-2 py-1 text-gray-700 shadow",
-                    user!.username === message.to_user.username ? "" : "bg-gray-100"
+                    user!.username === message.from_user.username ? "bg-gray-100" : ""
                 )}
             >
                 <div className="flex items-end">

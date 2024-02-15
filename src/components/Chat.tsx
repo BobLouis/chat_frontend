@@ -74,11 +74,7 @@ export function Chat() {
             <span>The WebSocket is currently {connectionStatus}</span>
             {/* Display the welcome message */}
             {welcomeMessage && <p>{welcomeMessage}</p>}
-            <ul className="mt-3 flex flex-col-reverse relative w-full border border-gray-200 overflow-y-auto p-6">
-                {messageHistory.map((message: MessageModel) => (
-                    <Message key={message.id} message={message} />
-                ))}
-            </ul>
+
             <button
                 className="bg-gray-300 px-3 py-1"
                 onClick={() => {
@@ -101,13 +97,13 @@ export function Chat() {
                 Submit
             </button>
             <hr />
-            <ul>
-                {messageHistory.map((message: any, idx: number) => (
-                    <div className='border border-gray-200 py-3 px-3' key={idx}>
-                        {message.name}: {message.message}
-                    </div>
+
+            <ul className="mt-3 flex flex-col-reverse relative w-full border border-gray-200 overflow-y-auto p-6">
+                {messageHistory.map((message: MessageModel) => (
+                    <Message key={message.id} message={message} />
                 ))}
             </ul>
+
         </div>
     );
 }
