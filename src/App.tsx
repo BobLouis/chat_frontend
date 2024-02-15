@@ -8,6 +8,7 @@ import { Navbar } from "./components/Navbar";
 import { Conversations } from "./components/Conversations";
 import { AuthContextProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { ActiveConversations } from "./components/ActiveConversation";
 export default function App() {
   return (
     <BrowserRouter>
@@ -33,6 +34,15 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Chat />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="conversations/"
+            element={
+              <ProtectedRoute>
+                <ActiveConversations />
               </ProtectedRoute>
             }
           />
