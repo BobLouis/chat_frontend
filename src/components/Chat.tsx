@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { AuthContext } from "../contexts/AuthContext";
 import { useParams } from "react-router-dom";
@@ -7,6 +7,8 @@ import { ConversationModel } from "../models/Conversation";
 import { Message } from "./Message";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { ChatLoader } from "./ChatLoader";
+import { useHotkeys } from "react-hotkeys-hook";
+
 export function Chat() {
     const { conversationName } = useParams();
     const [welcomeMessage, setWelcomeMessage] = useState("");
@@ -20,6 +22,36 @@ export function Chat() {
 
     const [participants, setParticipants] = useState<string[]>([]);
     const [conversation, setConversation] = useState<ConversationModel | null>(null);
+
+    const [meTyping, setMeTyping] = useState(false);
+    const [typing, setTyping] = useState(false);
+
+    const timeout = useRef<any>();
+    const inputReference = useRef<HTMLInputElement>(null);
+
+    function timeoutFunction() {
+        setMeTyping(false);
+        sendJsonMessage({ type: "typing", typing: false });
+    }
+
+    function updateTyping(event: { user: string; typing: boolean }) {
+        if (event.user !== user!.username) {
+            setTyping(event.typing);
+        }
+    }
+
+    function onType() {
+        if (meTyping === false) {
+            setMeTyping(true);
+            sendJsonMessage({ type: "typing", typing: true });
+            timeout.current = setTimeout(timeoutFunction, 5000);
+        } else {
+            clearTimeout(timeout.current);
+            timeout.current = setTimeout(timeoutFunction, 5000);
+        }
+    }
+
+    useEffect(() => () => clearTimeout(timeout.current), []);
 
 
 
@@ -40,6 +72,21 @@ export function Chat() {
         }
         fetchConversation();
     }, [conversationName, user]);
+
+    useEffect(() => {
+        (inputReference.current as HTMLElement).focus();
+    }, [inputReference]);
+
+    useHotkeys(
+        "enter",
+        () => {
+            handleSubmit();
+        },
+        [],
+        [inputReference] // Dependency array
+    );
+
+
 
     async function fetchMessages() {
         const apiRes = await fetch(
@@ -110,15 +157,21 @@ export function Chat() {
                 case "online_user_list":
                     setParticipants(data.users);
                     break;
+                case 'typing':
+                    updateTyping(data);
+                    break;
                 default:
                     console.error("Unknown message type!");
                     break;
             }
         }
     });
-    function handleChangeMessage(e: any) {
+    function handleChangeMessage(e: React.ChangeEvent<HTMLInputElement>) {
         setMessage(e.target.value);
-        // Check if Enter key is pressed and message is not empty
+        onType();
+    }
+
+    function handleKeyPress(e: React.KeyboardEvent<HTMLInputElement>) {
         if (e.key === 'Enter' && message.trim()) {
             handleSubmit();
         }
@@ -126,12 +179,16 @@ export function Chat() {
 
 
     function handleSubmit() {
+        if (message.length === 0) return;
+        if (message.length > 512) return;
         sendJsonMessage({
             type: "chat_message",
             message,
         });
 
         setMessage("");
+        clearTimeout(timeout.current);
+        timeoutFunction();
     }
 
 
@@ -180,23 +237,33 @@ export function Chat() {
                 Say Hi
             </button>
 
-            <input
-                name="message"
-                placeholder='Message'
-                onChange={handleChangeMessage}
-                onKeyPress={handleChangeMessage}
-                value={message}
-                className="ml-2 shadow-sm sm:text-sm border-gray-300 bg-gray-100 rounded-md" />
-            <button className='ml-3 bg-gray-300 px-3 py-1' onClick={handleSubmit}>
-                Submit
-            </button>
+
+
+            <div className="flex w-full items-center justify-between border border-gray-200 p-3">
+                <input
+                    type="text"
+                    placeholder="Message"
+                    className="block w-full rounded-full bg-gray-100 py-2 outline-none focus:text-gray-700"
+                    name="message"
+                    value={message}
+                    onChange={handleChangeMessage}
+                    onKeyPress={handleKeyPress}
+                    required
+                    ref={inputReference}
+                    maxLength={511}
+                />
+                <button className="ml-3 bg-gray-300 px-3 py-1" onClick={handleSubmit}>
+                    Submit
+                </button>
+            </div>
+
+
+
             <hr />
 
-            {/* <ul className="mt-3 flex flex-col-reverse relative w-full border border-gray-200 overflow-y-auto p-6">
-                {messageHistory.map((message: MessageModel) => (
-                    <Message key={message.id} message={message} />
-                ))}
-            </ul> */}
+            {
+                typing && <p className="truncate text-sm text-gray-500">typing...</p>
+            }
 
             <div
                 id="scrollableDiv"
