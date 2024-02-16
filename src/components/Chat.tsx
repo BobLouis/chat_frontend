@@ -19,7 +19,7 @@ export function Chat() {
 
     async function fetchMessages() {
         const apiRes = await fetch(
-            `http://127.0.0.1:8000/chats/?conversation=${conversationName}&page=${page}`,
+            `http://127.0.0.1:8000/chats/messages/?conversation=${conversationName}&page=${page}`,
             {
                 method: "GET",
                 headers: {
@@ -76,6 +76,10 @@ export function Chat() {
     });
     function handleChangeMessage(e: any) {
         setMessage(e.target.value);
+        // Check if Enter key is pressed and message is not empty
+        if (e.key === 'Enter' && message.trim()) {
+            handleSubmit();
+        }
     }
 
 
@@ -125,6 +129,7 @@ export function Chat() {
                 name="message"
                 placeholder='Message'
                 onChange={handleChangeMessage}
+                onKeyPress={handleChangeMessage}
                 value={message}
                 className="ml-2 shadow-sm sm:text-sm border-gray-300 bg-gray-100 rounded-md" />
             <button className='ml-3 bg-gray-300 px-3 py-1' onClick={handleSubmit}>
