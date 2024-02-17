@@ -100,7 +100,7 @@ export function Navbar() {
                                 >
                                     Active Conversations
                                     {
-                                        unreadMessageCount > 0 && (
+                                        (
                                             <span className="ml-2 inline-flex items-center justify-center h-6 w-6 rounded-full bg-white">
                                                 <span className="text-xs font-medium leading-none text-gray-800">{unreadMessageCount}</span>
                                             </span>

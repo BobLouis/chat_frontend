@@ -57,6 +57,7 @@ export function Chat() {
 
 
 
+
     useEffect(() => {
         async function fetchConversation() {
             const apiRes = await fetch(`http://127.0.0.1:8000/chats/conversations/${conversationName}/`, {
@@ -136,6 +137,7 @@ export function Chat() {
                 case 'chat_message_echo':
                     // setMessageHistory((prev: any) => prev.concat(data.message));
                     setMessageHistory((prev: any) => [data.message, ...prev]);
+                    sendJsonMessage({ type: "read_messages" });
                     break;
                 case "last_50_messages":
                     setMessageHistory(data.messages);
@@ -207,6 +209,17 @@ export function Chat() {
             token: user ? user.token : "",
         }
     })
+
+
+    //mark as read
+    useEffect(() => {
+        if (connectionStatus === "Open") {
+            sendJsonMessage({
+                type: "read_messages"
+            });
+        }
+    }, [connectionStatus, sendJsonMessage]);
+
 
     return (
         <div>

@@ -32,6 +32,9 @@ export const NotificationContextProvider: React.FC<{ children: ReactNode }> = ({
         onMessage: (e) => {
             const data = JSON.parse(e.data);
             switch (data.type) {
+                case "unread_count":
+                    setUnreadMessageCount(data.unread_count);
+                    break;
                 case "new_message_notification":
                     setUnreadMessageCount((count) => (count += 1));
                     break;
